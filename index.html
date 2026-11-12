@@ -3,54 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Archivio Clienti - Slider</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Archivio Clienti</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; max-width: 500px; margin: auto; background: #f5f5f7; color: #1d1d1f; }
+    body { font-family: -apple-system, sans-serif; padding: 20px; max-width: 500px; margin: auto; background: #f5f5f7; color: #1d1d1f; }
     h1 { text-align: center; font-size: 24px; margin-bottom: 20px; }
     input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #d2d2d7; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-    a { display: block; padding: 15px; margin: 10px 0; background: #007AFF; color: white; text-decoration: none; border-radius: 10px; font-weight: 600; text-transform: capitalize; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    a:active { background: #005bb5; }
-    .status { text-align: center; color: #6e6e73; }
+    a { display: block; padding: 15px; margin: 10px 0; background: #007AFF; color: white; text-decoration: none; border-radius: 10px; font-weight: 600; }
+    .status { text-align: center; color: #6e6e73; font-size: 14px; }
   </style>
 </head>
 <body>
   <h1>Progetti Clienti</h1>
   <input type="text" id="cerca" placeholder="Cerca cliente..." onkeyup="filtra()">
-  <div id="lista" class="status">Caricamento progetti in corso...</div>
+  <div id="lista" class="status">Caricamento in corso...</div>
 
   <script>
-    const utente = 'Havoc1989';
-    const repo = 'Slider';
     const listaDiv = document.getElementById('lista');
+    const utente = window.location.hostname.split('.')[0];
+    const repo = window.location.pathname.split('/')[1];
 
-    fetch(`https://github.com{utente}/${repo}/contents/`)
+    fetch(`https://github.com{utente}/${repo}/contents/?t=${Date.now()}`)
       .then(res => res.json())
       .then(files => {
+        if (!Array.isArray(files)) throw new Error(files.message || 'Errore API');
         listaDiv.innerHTML = '';
-        listaDiv.classList.remove('status');
-
-        // Filtra tutti i file .html (escluso index.html) e le cartelle
-        const progetti = files.filter(item => 
-          (item.type === 'file' && item.name.endsWith('.html') && item.name !== 'index.html') ||
+        const progetti = files.filter(item =>
+          (item.type === 'file' && item.name.toLowerCase().endsWith('.html') && item.name.toLowerCase() !== 'index.html') ||
           item.type === 'dir'
         );
 
         if (progetti.length === 0) {
-          listaDiv.innerHTML = '<p class="status">Nessun cliente trovato.</p>';
+          listaDiv.innerHTML = '<p class="status">Nessun file trovato.</p>';
           return;
         }
 
         progetti.forEach(item => {
           const link = document.createElement('a');
-          // Pulisce il nome (toglie .html e sostituisce i trattini con spazi)
-          const nomePulito = item.name.replace('.html', '').replace(/-/g, ' ');
-          link.textContent = nomePulito;
+          link.textContent = item.name.replace(/\.html$/i, '').replace(/-/g, ' ');
           link.href = item.type === 'dir' ? `${item.name}/` : item.name;
           listaDiv.appendChild(link);
         });
       })
-      .catch(() => {
-        listaDiv.innerHTML = '<p class="status">Errore nel caricamento. Assicurati che il repository sia Public.</p>';
+      .catch(err => {
+        listaDiv.innerHTML = `<p class="status">Errore: ${err.message}</p>`;
       });
 
     function filtra() {
