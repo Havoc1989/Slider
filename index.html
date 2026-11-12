@@ -7,54 +7,23 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Archivio Clienti</title>
   <style>
-    body { font-family: -apple-system, sans-serif; padding: 20px; max-width: 500px; margin: auto; background: #f5f5f7; color: #1d1d1f; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; max-width: 500px; margin: auto; background: #f5f5f7; color: #1d1d1f; }
     h1 { text-align: center; font-size: 24px; margin-bottom: 20px; }
     input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #d2d2d7; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-    a { display: block; padding: 15px; margin: 10px 0; background: #007AFF; color: white; text-decoration: none; border-radius: 10px; font-weight: 600; }
-    .status { text-align: center; color: #6e6e73; font-size: 14px; }
+    a { display: block; padding: 15px; margin: 10px 0; background: #007AFF; color: white; text-decoration: none; border-radius: 10px; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    a:active { background: #005bb5; }
   </style>
 </head>
 <body>
   <h1>Progetti Clienti</h1>
   <input type="text" id="cerca" placeholder="Cerca cliente..." onkeyup="filtra()">
-  <div id="lista" class="status">Caricamento in corso...</div>
+  
+  <div id="lista">
+    <a href="Rossi.html">Rossi</a>
+    <!-- Aggiungi qui sotto i prossimi clienti copiando la riga sopra -->
+  </div>
 
   <script>
-    const listaDiv = document.getElementById('lista');
-    // Se aperto da web legge l'URL, altrimenti usa Havoc1989 e Slider
-    const isGitHubPages = window.location.hostname.includes('github.io');
-    const utente = isGitHubPages ? window.location.hostname.split('.')[0] : 'Havoc1989';
-    const repo = isGitHubPages ? window.location.pathname.split('/')[1] : 'Slider';
-
-    fetch(`https://github.com{utente}/${repo}/contents/`)
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(files => {
-        if (!Array.isArray(files)) throw new Error(files.message || 'Errore API');
-        listaDiv.innerHTML = '';
-        const progetti = files.filter(item =>
-          (item.type === 'file' && item.name.toLowerCase().endsWith('.html') && item.name.toLowerCase() !== 'index.html') ||
-          item.type === 'dir'
-        );
-
-        if (progetti.length === 0) {
-          listaDiv.innerHTML = '<p class="status">Nessun file trovato.</p>';
-          return;
-        }
-
-        progetti.forEach(item => {
-          const link = document.createElement('a');
-          link.textContent = item.name.replace(/\.html$/i, '').replace(/-/g, ' ');
-          link.href = item.type === 'dir' ? `${item.name}/` : item.name;
-          listaDiv.appendChild(link);
-        });
-      })
-      .catch(err => {
-        listaDiv.innerHTML = `<p class="status">Errore: ${err.message}</p>`;
-      });
-
     function filtra() {
       const testo = document.getElementById('cerca').value.toLowerCase();
       document.querySelectorAll('#lista a').forEach(a => {
