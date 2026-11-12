@@ -21,11 +21,16 @@
 
   <script>
     const listaDiv = document.getElementById('lista');
-    const utente = window.location.hostname.split('.')[0];
-    const repo = window.location.pathname.split('/')[1];
+    // Se aperto da web legge l'URL, altrimenti usa Havoc1989 e Slider
+    const isGitHubPages = window.location.hostname.includes('github.io');
+    const utente = isGitHubPages ? window.location.hostname.split('.')[0] : 'Havoc1989';
+    const repo = isGitHubPages ? window.location.pathname.split('/')[1] : 'Slider';
 
-    fetch(`https://github.com{utente}/${repo}/contents/?t=${Date.now()}`)
-      .then(res => res.json())
+    fetch(`https://github.com{utente}/${repo}/contents/`)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then(files => {
         if (!Array.isArray(files)) throw new Error(files.message || 'Errore API');
         listaDiv.innerHTML = '';
